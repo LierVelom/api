@@ -19,6 +19,17 @@ class CartResource extends JsonResource
                     'description' => $product->desc,
                     'price' => $product->price,
                     'quantity' => $product->pivot->quantity,
+                    'promotions' => $product->promotions->map(function ($promotion) {
+                        return [
+                            'id' => $promotion->id,
+                            'name' => $promotion->name,
+                            'description' => $promotion->description,
+                            'discount_percentage' => $promotion->discount_percentage,
+                            'discount_amount' => $promotion->discount_amount,
+                            'start_date' => $promotion->start_date,
+                            'end_date' => $promotion->end_date,
+                        ];
+                    })
                 ];
             }),
             'created_at' => $this->created_at,

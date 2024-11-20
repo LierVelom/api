@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\PromotionResource;
 
 class ProductResource extends JsonResource
 {
@@ -22,6 +23,7 @@ class ProductResource extends JsonResource
             'size' => $this->size,
             'color' => $this->color,
             'created_at' => $this->created_at,
+            'promotions' => PromotionResource::collection($this->whenLoaded('promotions')), // Thêm khuyến mãi
         ];
     }
 }

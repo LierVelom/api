@@ -31,7 +31,7 @@ class ProductController extends Controller
             $query->where('color', $request->color); // Bộ lọc đơn giản (bằng)
         }
 
-        $products = $query->get();
+        $products = $query->with('promotions')->get();
 
         return ProductResource::collection($products);
     }
@@ -39,6 +39,7 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::findOrFail($id);
+        $product->load('promotions');
         return new ProductResource($product);  // Trả về một sản phẩm
     }
 
@@ -46,16 +47,38 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
 
-        // Lấy sản phẩm liên quan theo category_id
-        $relatedProducts = Product::where('category_id', $product->category_id)
+        // Lấy tên của sản phẩm hiện tại làm từ khóa
+        $search = $product->name;
+
+        // Khởi tạo query để tìm sản phẩm liên quan theo category_id và tên, mô tả hoặc chuyên mục
+        $query = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id) // Bỏ qua sản phẩm hiện tại
-            ->orWhere('name', 'like', '%' . $product->name . '%') // Lọc theo tên sản phẩm
-            ->orWhere('desc', 'like', '%' . $product->desc . '%') // Lọc theo mô tả sản phẩm
-            ->orWhere('category_id', $product->category_id) // Lọc theo category_id
             ->limit(10) // Giới hạn số lượng sản phẩm liên quan
-            ->get();
+            ->with('promotions'); // Gắn quan hệ khuyến mãi vào sản phẩm
+
+        // Lọc sản phẩm theo tên, mô tả và chuyên mục với từ khóa là tên của sản phẩm hiện tại
+        $query->where(function ($query) use ($search) {
+            $query->where('name', 'like', '%' . $search . '%') // Lọc theo tên sản phẩm
+                ->orWhere('desc', 'like', '%' . $search . '%') // Lọc theo mô tả sản phẩm
+                ->orWhereHas('categories', function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%'); // Lọc theo tên chuyên mục
+                });
+        });
+
+        // Lấy các sản phẩm liên quan với các bộ lọc tìm kiếm
+        $relatedProducts = $query->get();
 
         return ProductResource::collection($relatedProducts);
+    }
+
+
+    public function productsWithPromotions()
+    {
+        $products = Product::whereHas('promotions') // Chỉ lấy sản phẩm có khuyến mãi
+            ->with('promotions') // Gắn quan hệ khuyến mãi vào sản phẩm
+            ->get();
+
+        return response()->json($products, 200);
     }
 
     /**
