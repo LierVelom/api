@@ -18,7 +18,7 @@ class CartController extends Controller
         $quantity = $request->input('quantity', 1);
 
         // Kiểm tra nếu giỏ hàng của người dùng hiện tại đã tồn tại, nếu chưa, tạo mới
-        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        $cart = Cart::firstOrCreate(['user_id' => $user->id, 'status' => 'active']);
 
         // Kiểm tra nếu sản phẩm đã có trong giỏ hàng
         if ($cart->products()->where('product_id', $productId)->exists()) {
@@ -41,9 +41,10 @@ class CartController extends Controller
         if (!is_numeric($quantity) || $quantity <= 0) {
             return response()->json(['message' => 'Invalid quantity'], 400);
         }
-
-        // Tìm giỏ hàng của người dùng hiện tại
-        $cart = Cart::where('user_id', $user->id)->firstOrFail();
+        // Tìm giỏ hàng ở trạng thái 'active' của người dùng hiện tại
+        $cart = Cart::where('user_id', $user->id)
+            ->where('status', 'active') // Điều kiện trạng thái active
+            ->firstOrFail();
 
         // Kiểm tra nếu sản phẩm có trong giỏ hàng
         if (!$cart->products()->where('product_id', $productId)->exists()) {
@@ -53,6 +54,9 @@ class CartController extends Controller
         // Cập nhật số lượng sản phẩm
         $cart->products()->updateExistingPivot($productId, ['quantity' => $quantity]);
 
+        // Cập nhật updated_at của giỏ hàng
+        $cart->touch();
+
         return response()->json(['message' => 'Product quantity updated'], 200);
     }
 
@@ -60,9 +64,10 @@ class CartController extends Controller
     public function removeProduct($productId)
     {
         $user = Auth::user();
-
-        // Tìm giỏ hàng của người dùng hiện tại
-        $cart = Cart::where('user_id', $user->id)->firstOrFail();
+        // Tìm giỏ hàng ở trạng thái 'active' của người dùng hiện tại
+        $cart = Cart::where('user_id', $user->id)
+            ->where('status', 'active') // Điều kiện trạng thái active
+            ->firstOrFail();
 
         // Kiểm tra nếu sản phẩm có trong giỏ hàng
         if (!$cart->products()->where('product_id', $productId)->exists()) {
@@ -79,8 +84,16 @@ class CartController extends Controller
     public function show()
     {
         $userId = Auth::id();
-    
-        $cart = Cart::with('products')->where('user_id', $userId)->firstOrFail();
+
+        if (!$userId) {
+            return response()->json(['message' => 'User not logged in'], 401);
+        }
+
+        // Lấy giỏ hàng nếu đã tồn tại, hoặc tạo mới nếu chưa có
+        $cart = Cart::with('products')->firstOrCreate(
+            ['user_id' => $userId, 'status' => 'active'], // Điều kiện tìm kiếm
+            ['created_at' => now()] // Dữ liệu mặc định để tạo mới nếu không tìm thấy
+        );
 
         return new CartResource($cart);
     }

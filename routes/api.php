@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\PaymentController;
 
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -27,11 +28,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/cart/{product}', [CartController::class, 'updateProduct']);  // Sửa số lượng sản phẩm
     Route::delete('/cart/{product}', [CartController::class, 'removeProduct']); // Xóa sản phẩm khỏi giỏ hàng
 
-	Route::get('/cart', [CartController::class, 'show']); // Hiển thị giỏ hàng
+    Route::get('/cart', [CartController::class, 'show']); // Hiển thị giỏ hàng
 
-	Route::get('/user', function (Request $request) {
-		return $request->user();
-	});
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+
+    Route::post('/checkout', [PaymentController::class, 'checkout']);
 });
 
 Route::prefix('promotions')->group(function () {
