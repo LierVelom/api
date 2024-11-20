@@ -10,7 +10,6 @@ An API built with Laravel, providing features for product management, categories
 -   **Category Management**: Associate and filter products by categories
 -   **Promotions**: Manage and retrieve promotional offers
 -   **Cart Operations**: Add, update, and manage products in cart
--   **Payment Integration**: Momo payment gateway support
 -   **User Authentication**: Registration, login, token management
 
 ## Requirements
@@ -123,10 +122,6 @@ php artisan serve
 
 -   **View Cart**: `GET /api/cart`
 -   **Add Product**: `POST /api/cart/add`
-
-### Payments
-
--   **Momo Checkout**: `POST /api/checkout`
 
 ## Testing
 

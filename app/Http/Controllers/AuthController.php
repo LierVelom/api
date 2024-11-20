@@ -74,4 +74,13 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
         ]);
     }
+    public function logout(Request $request)
+    {
+        // Xóa token hiện tại của người dùng
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully',
+        ], 200);
+    }
 }
