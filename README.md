@@ -26,8 +26,8 @@ An API built with Laravel, providing features for product management, categories
 1. Clone repository:
 
 ```bash
-git clone <repository-url>
-cd <project-directory>
+git clone https://github.com/LierVelom/api.git
+cd api
 ```
 
 2. Install dependencies:
