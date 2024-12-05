@@ -22,6 +22,7 @@ class ProductResource extends JsonResource
             'price' => $this->price,
             'size' => $this->size,
             'color' => $this->color,
+            'rating' => $this->rating,
             'created_at' => $this->created_at,
             'promotions' => PromotionResource::collection($this->whenLoaded('promotions')), // Thêm khuyến mãi
         ];

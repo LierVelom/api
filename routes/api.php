@@ -9,6 +9,8 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ReviewController;
 
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -36,6 +38,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::post('/checkout', [PaymentController::class, 'checkout']);
+
+    Route::get('/invoices', [InvoiceController::class, 'index']);
+    Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
+    Route::post('/invoices', [InvoiceController::class, 'store']);
+    Route::put('/invoices/{id}', [InvoiceController::class, 'update']);
+    Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy']);
+
+    Route::post('/products/{productId}/reviews', [ReviewController::class, 'store']);
+    Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
 });
 
 Route::prefix('promotions')->group(function () {
